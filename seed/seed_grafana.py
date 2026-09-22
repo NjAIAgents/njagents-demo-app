@@ -141,7 +141,7 @@ def team_config():
             "host": "nishantnavjyot.atlassian.net", "board_id": 76,
             "priority_names": {"P1": "Highest", "P2": "High", "P3": "Medium", "P4": "Low"},
             "at_risk_labels": ["at-risk-renewal", "escalation"], "voc_destination": "DEMO",
-            "//component_model": "Components are carried as labels of the form component-<name>.",
+            "component_label_prefix": "component-",
         },
         "sources": {
             "tracker": {"mode": "live"}, "releases": {"mode": "live"},
