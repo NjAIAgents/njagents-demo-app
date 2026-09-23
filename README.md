@@ -13,3 +13,5 @@ Every defect below is deliberate and documented.
 | `core-api/src/main/java/settlement/ExportScheduler.java` | scheduler can skip a run after config reload | BUG-4851 |
 
 Releases `2026.08` and `2026.09` are tagged so release correlation has a manifest.
+
+The triage agent reads this repository through GitHub code search, file reads and tags. It never writes here.
