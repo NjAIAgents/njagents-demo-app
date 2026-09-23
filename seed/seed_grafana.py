@@ -181,8 +181,25 @@ def main():
     os.makedirs(a.out_dir, exist_ok=True)
     with open(os.path.join(a.out_dir, "demo-live.releases.json"), "w", encoding="utf-8") as f:
         json.dump(release_envelope(t), f, indent=2)
-    with open(os.path.join(a.out_dir, "demo-live.json"), "w", encoding="utf-8") as f:
-        json.dump(team_config(), f, indent=2)
+    cfg_path = os.path.join(a.out_dir, "demo-live.json")
+    if os.path.exists(cfg_path):
+        # Merge, never overwrite: the team may already have bound other sources (a code
+        # host, release tags). Only point the manual release file at the seeded one, so
+        # the release, the spike and the silence share one timeline. Metrics bindings are
+        # left alone: /triage-config demo-live metrics proves them against live tools.
+        with open(cfg_path, encoding="utf-8") as f:
+            cfg = json.load(f)
+        rc = cfg.setdefault("release_correlation", {})
+        rc["manual_file_path"] = "demo-live.releases.json"
+        srcs = rc.setdefault("manifest_sources", [])
+        if "manual_file" not in srcs:
+            srcs.append("manual_file")
+        how = "updated (manual_file_path only)"
+    else:
+        cfg, how = team_config(), "written"
+    with open(cfg_path, "w", encoding="utf-8") as f:
+        json.dump(cfg, f, indent=2, ensure_ascii=False)
+        f.write("\n")
 
     base = [v for v in streams[0][1] if v[0] < t["spike"]]
     after = [v for v in streams[0][1] if v[0] >= t["spike"]]
@@ -195,7 +212,7 @@ def main():
     print(f"Lines: approvals-api {len(streams[0][1])} "
           f"({b_rate:.1f}/h before, {a_rate:.1f}/h after, {a_rate / b_rate:.1f}x), "
           f"deployer {len(streams[1][1])}, settlement-exporter {len(streams[2][1])}")
-    print(f"Wrote {a.out_dir}/demo-live.json and {a.out_dir}/demo-live.releases.json")
+    print(f"Release file written: {a.out_dir}/demo-live.releases.json; team config {how}")
 
     if a.dry_run:
         print("Dry run: nothing sent.")
