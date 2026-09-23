@@ -33,6 +33,14 @@ about a week), so re-running `seed/seed_grafana.py` moves the whole Loki story f
 `2026.09` it returns 200 and logs `approval not committed` at warn, the same defect as
 line 89. `api/health.js` reports the deployed version.
 
+## Tag versus deploy
+
+The `2026.09` tag points at `919f499`. Vercel's `2026.09` production deploy was built from
+`main` at `8c32c8b`, because the deployable `api/` slice was added afterwards. The app code
+under `approvals-api/` and `core-api/` is identical in both commits; only `api/`, `docs/`,
+`seed/`, `package.json` and `version.json` differ. Release correlation reads the tag, and
+the tag's file list is the code that runs.
+
 ## Re-seeding
 
     python3 seed/seed_grafana.py --out-dir <folder>/triage-teams   # Loki, needs LOKI_* env
