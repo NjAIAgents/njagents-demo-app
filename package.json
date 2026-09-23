@@ -1,0 +1,6 @@
+{
+  "name": "njagents-demo-app",
+  "private": true,
+  "description": "Synthetic app for the bug-triage-agent demo. Deliberate defects.",
+  "engines": { "node": "22.x" }
+}
