@@ -1,7 +1,7 @@
 // Signs outbound webhook payloads with the endpoint's shared secret (HMAC-SHA256).
 //
-// Endpoint records come from the webhook_endpoints table:
-//   { id, url, schema, auth: { signingSecret } }
+// Endpoint records come from the webhook_endpoints table. Schema v1 keeps the secret
+// in auth.signingSecret; schema v2 (migration 0042) moves it to credentials.signing.secret.
 // The secret is set when the customer registers the endpoint and is rotated from
 // the dashboard (Settings > Webhooks > Rotate secret).
 //
