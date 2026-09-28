@@ -323,6 +323,17 @@ def blip_only(t, rng):
     return S
 
 
+def release_only(t, rng):
+    """The 2026.10 deploy of notification-worker that shipped migration 0042 (DEMO-11)."""
+    S = Streams()
+    lab = {"service": "deployer", "level": "info", "pod": "deployer-ci"}
+    m = t["migration"]
+    S.add(lab, m - timedelta(minutes=9), "deploy started version=2026.10 service=notification-worker strategy=rolling replicas=3")
+    S.add(lab, m - timedelta(minutes=6), "deploy version=2026.10 service=notification-worker status=success strategy=rolling replicas=3")
+    S.add(lab, m - timedelta(minutes=3), "deploy post-step version=2026.10 service=notification-worker step=migrate migration=0042_webhook_v2")
+    return S
+
+
 def deploys(S, t, rng):
     """Routine deploys of services outside the DEMO-7 and DEMO-9 stories."""
     plan = [
@@ -429,6 +440,7 @@ def main():
     ap.add_argument("--batch-kb", type=int, default=250, help="approximate size of each push request")
     ap.add_argument("--pause", type=float, default=0.5, help="seconds between requests")
     ap.add_argument("--window-start", help='resume with the window start a previous run printed, e.g. "2026-09-21 04:00"')
+    ap.add_argument("--release-only", action="store_true", help="push only the 2026.10 deploy lines (DEMO-11)")
     ap.add_argument("--blip-only", action="store_true", help="push only the DEMO-13 database outage")
     ap.add_argument("--probe", action="store_true", help="send one batch and print Loki's full response")
     ap.add_argument("--start-batch", type=int, default=0, help="resume from this batch number")
@@ -439,7 +451,12 @@ def main():
     if a.window_start:
         ws = datetime.strptime(a.window_start, "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
     t = timeline(datetime.now(timezone.utc), ws)
-    S = blip_only(t, random.Random(a.seed + 1)) if a.blip_only else build(t, rng)
+    if a.release_only:
+        S = release_only(t, rng)
+    elif a.blip_only:
+        S = blip_only(t, random.Random(a.seed + 1))
+    else:
+        S = build(t, rng)
 
     total = sum(len(v) for v in S.s.values())
     per_service = {}
