@@ -8,10 +8,10 @@ function escape(value: unknown): string {
 }
 
 export function toCsv(rows: Row[]): string {
-  // BUG-4858: the amount column was added to the data in 2026.09 but the header
-  // list above was updated without shifting the leading blank, so every header
-  // from 'amount' onward sits one column to the right of its values.
-  const header = ["", ...HEADERS].join(",");
+  // DEMO-6: the header list must line up one to one with the columns written below.
+  // 2026.09 prefixed a blank cell, which shifted every header from 'amount' onward
+  // one column to the right of its values.
+  const header = HEADERS.join(",");
   const body = rows
     .map((r) =>
       [r.id, r.account, r.status, r.amount, r.createdAt].map(escape).join(",")
