@@ -2,5 +2,13 @@
   "name": "njagents-demo-app",
   "private": true,
   "description": "Synthetic app for the bug-triage-agent demo. Deliberate defects.",
-  "engines": { "node": "22.x" }
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "test": "NODE_ENV=test node --import tsx --test \"**/test/*.test.ts\" \"**/test/*.test.js\""
+  },
+  "devDependencies": {
+    "tsx": "4.20.6"
+  }
 }
