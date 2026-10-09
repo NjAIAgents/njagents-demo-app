@@ -1,8 +1,8 @@
 # njagents-demo-app
 
-Synthetic application used to demo `bug-triage-agent`. Nothing here runs; it exists so
+Synthetic application used to demo `bug-triage-agent` and `bug-fix-agent`. It exists so
 that code search, release correlation and file-level overlap have something real to
-find.
+find, and so a fix can be proved by a test that fails before it and passes after.
 
 Every defect below is deliberate and documented.
 
@@ -18,6 +18,27 @@ Releases `2026.08` and `2026.09` are tagged so release correlation has a manifes
 DEMO-11 has no release behind it: it starts with data migration `0042_webhook_v2` (in the logs), so release correlation should report an honest negative.
 
 Logs: `seed/seed_grafana.py` writes the DEMO-7 to DEMO-10 stories; `seed/seed_background.py` writes about 330k lines of realistic traffic across seven services and the DEMO-11 incident. Both need Loki write credentials from your own shell.
+
+## Tests
+
+```bash
+npm ci
+npm test                                                      # every service
+NODE_ENV=test node --import tsx --test approvals-api/test/csvExport.test.ts   # one file
+```
+
+Node 22's test runner, with `tsx` (the only dev dependency) so the TypeScript services
+run without a build step. Tests live in `<service>/test/*.test.ts` (`api/test/*.test.js`
+for the Vercel functions). The suite passes on `main`: it covers behaviour that works,
+never the planted defects, so a fix agent can prove a defect with a new test that fails
+before its change and passes after.
+
+The in-memory modules under `*/src/logger.ts`, `*/src/store/` and
+`notification-worker/src/queue/` stand in for the production logger, database and
+queues, so the services can run in a test. They expose what was written (`logged`,
+`committed`, `scheduled`, `dead`) for assertions.
+
+`core-api` (Java) has no test harness. A fix there stops with `suite_unavailable`.
 
 The triage agent reads this repository through GitHub code search, file reads and tags. It never writes here.
 
